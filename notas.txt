@@ -1,0 +1,103 @@
+creamos una capreta llamada products-app 
+
+creamos el microservicio 
+
+products-ms 
+
+creamos un resource par que me cree todo el crud de prodcuts
+
+
+TODO: CLASS VALIDATOR CLASS TRANSFORM 
+
+npm i class-validator class-transformer
+
+usar en las validaciones  dto
+
+TODO: DOTENV Y JOI
+
+npm i dotenv joi
+
+crear el archivo envs y e importarlos 
+
+import 'dotenv/config';
+import * as Joi from 'joi';
+
+en este mismo archivo apretar microenvs y traera el snippet que necsito
+
+TODO: INSTALAR PRISMA 
+
+npm i prisma --save-dev 
+npx prisma init 
+
+
+crear bd en neon  
+
+tomar cadena de conexion y ponerla en el env 
+
+actualizar archivo envs  con la variable de eotnrono
+
+import 'dotenv/config';
+import * as joi from 'joi';
+interface EnvVars {
+  PORT: number;
+  DATABASE_URL: string;
+}
+const envsSchema: joi.ObjectSchema = joi.object({
+  PORT: joi.number().required(),
+}).unknown(true);
+const { error, value } = envsSchema.validate(process.env);
+if(error) {
+    throw new Error(`Config validation error: ${error.message}`);
+}
+const envVars: EnvVars = value;
+export const envs = {
+    port: envVars.PORT,
+    databaseUrl: envVars.DATABASE_URL,
+}
+
+crear schema 
+
+ejecutar migracion 
+
+npx prisma migrate dev --name init
+
+instalar prisma client 
+
+ npm install @prisma/client
+
+en el archivo de product services agregue esto  a la clase la extendi y le implemente
+
+
+extends PrismaClient implements OnModuleInit {
+  onModuleInit() {
+    this.$connect();
+    console.log('Connected to the database');
+  }
+
+
+EPERM: operation not permitted, rename 
+
+para este error tuve que bajar el serivicio 
+
+ejectuar npx prisma generate 
+
+y luego la migracion co el nuievo campo 
+
+npx prismsa migrate dev --name soft
+
+
+una vez creado el crud rest veremos con hacer un microservicio
+
+TODO: MICROSERVICIO
+
+instalar 
+
+ npm i --save @nestjs/microservices
+
+TODO: ORGANIZAR REPOSITORIOS 
+
+ir a github 
+
+pulsar your organizations 
+
+maracar personal account en caso de ser personal 
