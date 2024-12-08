@@ -1,4 +1,5 @@
 import {
+ 
   Controller,
   // Get,
   // Post,
@@ -14,6 +15,7 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { PaginationDto } from 'src/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
+
 
 @Controller('products')
 export class ProductsController {
@@ -39,15 +41,23 @@ export class ProductsController {
   @MessagePattern({ cmd: 'find_all_products' })
   // LOS OBJTENSMO CON EL DECORADOR QUERY
   // y asi se le manda en el postman http://localhost:3001/products?page=1&limit=2
-  findAll(@Payload() paginationDto: PaginationDto) {
-    return this.productsService.findAll(paginationDto);
+   findAll(@Payload() paginationDto: PaginationDto) {
+
+    console.log('paginationDto', paginationDto);
+    
+    return  this.productsService.findAll(paginationDto);
   }
 
   // @Get(':id')
   @MessagePattern({ cmd: 'find_one_product' })
-  findOne(@Payload('id', ParseIntPipe) id: number) {
+  findOne(@Payload('id') id: number) {
+
+   
+  
+    // { id: 1
     return this.productsService.findOne(id);
   }
+
 
   // @Patch(':id')
   // TODO: MODIFICMAOS EL DTO DE UPDATE PARA RECIBIR UN ID

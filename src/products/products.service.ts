@@ -1,4 +1,5 @@
 import {
+  ConflictException,
   Injectable,
   Logger,
   NotFoundException,
@@ -72,14 +73,22 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
   }
 
   async findOne(id: number) {
+    if (!/^\d+$/.test(id.toString())) {
+      const error = new ConflictException('Id no válido'); // Lanza un error si no es solo números
+      return error.message; // Retorna el mensaje de error
+    }
+    // console.log(id);
+
     const product = await this.product.findFirst({
       where: {
-        id: id,
+        id: +id,
       },
     });
 
     if (!product || !product.available) {
-      throw new NotFoundException('Producto no encontrado');
+      // TODO: USO DE RPC EXCEPTION
+      // TUVE QUE CAMBIAR LOS OTROE RROERES POR ESTE
+      throw new ConflictException('Producto no encontrado');
     }
 
     console.log(product);
@@ -93,7 +102,7 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
     }
 
     if (isNaN(id)) {
-      throw new NotFoundException('Id no válido');
+      throw new ConflictException('Id no válido');
     }
 
     const product = await this.product.findFirst({
@@ -103,10 +112,10 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
     });
 
     if (!product) {
-      throw new NotFoundException('Producto no encontrado');
+      throw new ConflictException('Producto no encontrado');
     }
 
-    // TODO: DESTRUCTURACION DE OBJETO PARA NO ENVIAR EL ID QUE PUSIMOS EN EL DTO A RAIZ 
+    // TODO: DESTRUCTURACION DE OBJETO PARA NO ENVIAR EL ID QUE PUSIMOS EN EL DTO A RAIZ
     // DEL MESSAGEPATTERN PARA MICROSERVICIO
     const { id: idDto, ...data } = updateProductDto;
 
@@ -123,7 +132,7 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
 
     try {
     } catch (error) {
-      throw new Error('Hubo un error');
+      throw new ConflictException('Hubo un error');
     }
   }
 

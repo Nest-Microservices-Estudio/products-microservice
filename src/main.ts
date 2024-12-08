@@ -22,6 +22,7 @@ async function bootstrap() {
   });
 
   // TODO: ESTO ES PARA QUE LOS PARAMETROS QUE SE RECIBAN EN LOS ENDPOINTS SEAN VALIDADOS
+  // Y ASI FINCIONARA CLASS VALIDATOR Y CLAS TRANSFORER
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
