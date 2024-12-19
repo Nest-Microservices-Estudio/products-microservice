@@ -1,5 +1,6 @@
 import {
   ConflictException,
+  HttpStatus,
   Injectable,
   Logger,
   NotFoundException,
@@ -9,6 +10,7 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { PrismaClient } from '@prisma/client';
 import { PaginationDto } from 'src/common';
+import { RpcException } from '@nestjs/microservices';
 
 @Injectable()
 export class ProductsService extends PrismaClient implements OnModuleInit {
@@ -21,12 +23,19 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
     this.logger.log('Connected to the database');
   }
   create(createProductDto: CreateProductDto) {
-    // TODO: PODEMOS USAR THIS PRODUCT POR QUE EXTENDEMOS DE PRISMA CLIENT
-    const product = this.product.create({
-      data: createProductDto,
-    });
+    try {
+      // TODO: PODEMOS USAR THIS PRODUCT POR QUE EXTENDEMOS DE PRISMA CLIENT
+      const product = this.product.create({
+        data: createProductDto,
+      });
 
-    return product;
+      return product;
+    } catch (error) {
+      throw new RpcException({
+        message: 'Hubo un error',
+        HttpStatus: HttpStatus.BAD_REQUEST,
+      });
+    }
   }
 
   async findAll(paginationDto: PaginationDto) {
@@ -88,7 +97,13 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
     if (!product || !product.available) {
       // TODO: USO DE RPC EXCEPTION
       // TUVE QUE CAMBIAR LOS OTROE RROERES POR ESTE
-      throw new ConflictException('Producto no encontrado');
+      // PARA EL EXCEPTION CUSTOM FULTER DEL GATEWAY
+      // SEPARO EL MENSAJE Y EL STATUS
+      // PARA QUE EL GATEWAY PUEDA MANEJARLO
+      throw new RpcException({
+        message: 'Producto no encontrado o no disponible',
+        HttpStatus: HttpStatus.BAD_REQUEST,
+      });
     }
 
     console.log(product);
@@ -97,12 +112,20 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
   }
 
   async update(id: number, updateProductDto: UpdateProductDto) {
+    console.log('updateProductDto', updateProductDto);
+
     if (!updateProductDto.name || updateProductDto.name === '') {
-      throw new NotFoundException('Faltan datos para actualizar');
+      throw new RpcException({
+        message: 'Faltan datos para actualizar el producto',
+        HttpStatus: HttpStatus.CONFLICT,
+      });
     }
 
     if (isNaN(id)) {
-      throw new ConflictException('Id no válido');
+      return new RpcException({
+        message: 'Id no válido',
+        HttpStatus: HttpStatus.BAD_REQUEST,
+      });
     }
 
     const product = await this.product.findFirst({
@@ -111,8 +134,13 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
       },
     });
 
+    console.log('product DESDE EL CONTROLADOR DE PRODUCT----->', product);
+
     if (!product) {
-      throw new ConflictException('Producto no encontrado');
+      return new RpcException({
+        message: 'Pruducto no encontrado',
+        HttpStatus: HttpStatus.NOT_FOUND,
+      });
     }
 
     // TODO: DESTRUCTURACION DE OBJETO PARA NO ENVIAR EL ID QUE PUSIMOS EN EL DTO A RAIZ
@@ -121,24 +149,31 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
 
     console.log(idDto);
 
-    const productEdit = await this.product.update({
-      where: {
-        id: id,
-      },
-      data: data,
-    });
-
-    return productEdit;
-
     try {
+      const productEdit = await this.product.update({
+        where: {
+          id: id,
+        },
+        data: data,
+      });
+
+      return productEdit;
     } catch (error) {
-      throw new ConflictException('Hubo un error');
+      throw new RpcException({
+        message: 'Hubo un error',
+        HttpStatus: HttpStatus.NOT_MODIFIED,
+      });
     }
   }
 
   async remove(id: number) {
+    console.log('id ->', id);
+
     if (isNaN(+id)) {
-      throw new NotFoundException('Id no válido');
+      return new RpcException({
+        message: 'id no válido',
+        HttpStatus: HttpStatus.BAD_REQUEST,
+      });
     }
 
     const product = await this.product.findFirst({
@@ -148,7 +183,12 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
     });
 
     if (!product) {
-      throw new NotFoundException('Producto no encontrado');
+      console.log('product no encontrado->', product);
+
+      return new RpcException({
+        message: 'Producto no encontrado',
+        HttpStatus: HttpStatus.NOT_FOUND,
+      });
     }
 
     try {
@@ -163,7 +203,31 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
 
       return 'Producto deshabilitado';
     } catch (error) {
-      throw new Error('Hubo un error');
+      throw new RpcException('Hubo un error');
     }
+  }
+
+  async validateProduct(ids: number[]) {
+    // TODO: ELIMINAR DUPLICADOS DE UN ARRAY
+    ids = Array.from(new Set(ids));
+
+    // busco los productos que tengan los ids que me pasaron
+    const products = await this.product.findMany({
+      where: {
+        id: {
+          in: ids,
+        },
+      },
+    });
+
+    if (products.length !== ids.length) {
+      throw new RpcException({
+        message: 'Algunos productos no encontrados',
+        HttpStatus: HttpStatus.BAD_REQUEST,
+      });
+    }
+    console.log('ids', ids);
+    console.log('products', products);
+    return products;
   }
 }

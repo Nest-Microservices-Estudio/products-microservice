@@ -5,8 +5,8 @@ import {
   // Post,
   // Body,
   // Patch,
-  Param,
-  ParseIntPipe,
+  // Param,
+  // ParseIntPipe,
   // Delete,
   // Query,
 } from '@nestjs/common';
@@ -26,7 +26,7 @@ export class ProductsController {
   // USAMOS MessagePattern EN LUGAR DE POST
   // @Post()
   // Y USAMOS PAYLOAD EN VEZ DE BODY
-  @MessagePattern({ cmd: 'create_product' })
+  @MessagePattern('create_product')
   create(@Payload() createProductDto: CreateProductDto) {
     return this.productsService.create(createProductDto);
   }
@@ -38,18 +38,18 @@ export class ProductsController {
   // @Get()
   //  TODO: QUERY PARAMETERS
 
-  @MessagePattern({ cmd: 'find_all_products' })
+  @MessagePattern('find_all_products')
   // LOS OBJTENSMO CON EL DECORADOR QUERY
   // y asi se le manda en el postman http://localhost:3001/products?page=1&limit=2
    findAll(@Payload() paginationDto: PaginationDto) {
 
-    console.log('paginationDto', paginationDto);
+    console.log('FIND ALLLL DESDE MS');
     
     return  this.productsService.findAll(paginationDto);
   }
 
   // @Get(':id')
-  @MessagePattern({ cmd: 'find_one_product' })
+  @MessagePattern( 'find_one_product' )
   findOne(@Payload('id') id: number) {
 
    
@@ -61,7 +61,7 @@ export class ProductsController {
 
   // @Patch(':id')
   // TODO: MODIFICMAOS EL DTO DE UPDATE PARA RECIBIR UN ID
-  @MessagePattern({ cmd: 'update_product' })
+  @MessagePattern( 'update_product' )
 
   // AGREGAMOS EL ID QUE MNECESOTAMOS POR PARAMETRO 
   // AL DTO DEL UPDATE PARA ASI RECIBIR UN UNICO PAYLOAD 
@@ -72,8 +72,21 @@ export class ProductsController {
   }
 
   // @Delete(':id')
-  @MessagePattern({ cmd: 'delete_product' })
-  remove(@Param('id', ParseIntPipe) id: string) {
+  @MessagePattern('delete_product')
+  remove(@Payload('id') id: string) {
+
+ 
+    
+    console.log('id desde controller product', id);
+    
     return this.productsService.remove(+id);
+  }
+
+  // TODO: CREAR NUEVO METODO DE VALIDACION DE PRODUCTO
+
+  @MessagePattern('validate_products')
+  // 1. RECIBIMOS UNA COLECCION DE ID
+  validateProduct(@Payload() ids: number[]) {
+    return this.productsService.validateProduct(ids);
   }
 }

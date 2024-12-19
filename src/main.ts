@@ -8,6 +8,10 @@ async function bootstrap() {
   // TODO: LOGGER EN MAIN
   const logger = new Logger('Main');
 
+  console.log('NATS SERVERS DESDE PRODUCT MS',envs.natsServers);
+
+  
+
   // TODO: MICROSERVICIO INIT
   // CAMBIAREMOS ESTO
   // const app = await NestFactory.create(AppModule);
@@ -15,9 +19,14 @@ async function bootstrap() {
   // POR ESTO
 
   const app = await NestFactory.createMicroservice(AppModule, {
-    transport: Transport.TCP,
+  //  TODO: CAMBIANDO A NATS
+   
+    // transport: Transport.TCP,
+    transport: Transport.NATS,
+
     options: {
-      port: envs.port,
+      // port: envs.port,
+      servers: envs.natsServers ,
     },
   });
 

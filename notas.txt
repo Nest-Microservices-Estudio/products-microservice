@@ -101,3 +101,14 @@ ir a github
 pulsar your organizations 
 
 maracar personal account en caso de ser personal 
+
+TODO: EN LOS IFS SIEMPRE RETURN EN VEZ DE THROW
+
+
+TODO: NECESITO COMUNICAR MI ORDER MS CON PRODUCTS MS 
+
+1. npm i --save nats
+2. CREAR VARIABLES DE ENTORNO EN ORDER MS 
+
+PRODUCTS_MICROSERVICE_HOST:localhost
+PRODUCTS_MICROSERVICE_PORT:
