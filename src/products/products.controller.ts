@@ -28,6 +28,10 @@ export class ProductsController {
   // Y USAMOS PAYLOAD EN VEZ DE BODY
   @MessagePattern('create_product')
   create(@Payload() createProductDto: CreateProductDto) {
+
+
+    console.log('CREATE PRODUCT DESDE MS');
+    
     return this.productsService.create(createProductDto);
   }
 

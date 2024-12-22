@@ -14,14 +14,18 @@ datasource db {
 }
 
 model Product {
-  id        Int      @id @default(autoincrement())
-  name      String
-  price     Float
+  id    Int    @id @default(autoincrement())
+  name  String
+  price Float
 
-  available Boolean  @default(true)
-  createdAt DateTime @default(now())
+  available   Boolean  @default(true)
+  createdAt   DateTime @default(now())
   // @updatedAt funcion propia de prisma que pone la fecha de actualizacion
-  updatedAt DateTime @updatedAt
+  updatedAt   DateTime @updatedAt
+  currency_id String   @default("CLP")
+  picture_url String?
+  description String?
+  category_id String?
 
   // TODO: INDEX PRISMA
 
@@ -30,3 +34,17 @@ model Product {
   // asi tendremos conultas mas rapidas
   @@index([available])
 }
+
+// id       String @id @default(uuid())
+
+// productId Int
+// title String
+// price    Float
+// quantity Int
+// currency_id String @default("CLP")
+// picture_url String? 
+// description String?
+// category_id String?
+// // RELACIONES
+// orderId   String
+// order     Order  @relation(fields: [orderId], references: [id])
